@@ -1,0 +1,62 @@
+#version: '3'
+#services:
+#  db:
+#    image: postgres
+#    environment:
+#      POSTGRES_DB: bin_service
+#      POSTGRES_USER: user
+#      POSTGRES_PASSWORD: password
+#    volumes:
+#      - db_data:/var/lib/postgresql/data
+#
+#  cache:
+#    image: redis
+#
+#  web:
+#    build: .
+#    command: python bin_service/manage.py runserver 0.0.0.0:8000
+#    volumes:
+#      - ./bin_service:/code/bin_service
+#    ports:
+#      - "8000:8000"
+#    depends_on:
+#      - db
+#      - cache
+#
+#volumes:
+#  db_data:
+
+# docker-compose.yml
+version: '3'
+
+services:
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./bin_service:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DATABASE_NAME=${DATABASE_NAME}
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - DATABASE_HOST=db
+      - DATABASE_PORT=5432
+      - SECRET_KEY=${SECRET_KEY}
+      - DEBUG=1
+      - ALLOWED_HOSTS=localhost,127.0.0.1
+
+volumes:
+  postgres_data:
